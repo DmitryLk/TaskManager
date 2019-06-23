@@ -24,6 +24,7 @@ namespace TaskManager.Models
         public void Enqueue(Task task)
         {
             task.EndExecution.AddHandler(EndNextTaskExecution);
+            task.Error.AddHandler(EndNextTaskExecution);
             _taskQueueDictionary[task.Priority].Enqueue(task);
             if (!IsBusy && IsStarted)
             {
