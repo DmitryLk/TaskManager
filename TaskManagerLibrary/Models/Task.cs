@@ -1,7 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using TaskManager.Enums;
+
+using System;
+
+using System.Threading;
+
+using System.Threading.Tasks;
 
 namespace TaskManager.Models
 {
@@ -38,13 +45,13 @@ namespace TaskManager.Models
         /// <summary>
         /// Выполнение задачи
         /// </summary>
-        public void Run()
+        public async void RunAsync()
         {
             BeginExecution.Invoke(this, new TaskEventArgs($"Начало выполнения задачи {Priority} {Name} {Type}"));
 
             //todo: выполнение задачи
             //Console.WriteLine(Content);
-
+            await System.Threading.Tasks.Task.Delay(100);
             if (rand.Next(1, 10) > 1)
             {
                 EndExecution.Invoke(this, new TaskEventArgs($"Окончание выполнения задачи {Priority} {Name} {Type}"));
@@ -54,6 +61,11 @@ namespace TaskManager.Models
                 Error.Invoke(this, new TaskEventArgs($"Ошибка выполнения задачи {Priority} {Name} {Type}"));
             }
         }
+
+        //private static System.Threading.Tasks.Task Delay(int v)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public void UpdatePriority(TaskPriority priority)
         {

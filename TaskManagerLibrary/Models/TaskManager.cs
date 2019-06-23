@@ -59,7 +59,7 @@ namespace TaskManager.Models
 
         private void RunNextTask()
         {
-            if (IsBusy = TryGetNextTask(out Task task)) task.Run();
+            if (IsBusy = TryGetNextTask(out Task task)) task.RunAsync();
         }
 
         public void StopQueue()
