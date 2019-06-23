@@ -30,20 +30,20 @@ namespace TaskManager.Models
             Content = content ?? throw new ArgumentNullException(nameof(content));
             Priority = priority;
             Type = type;
-            Creating.DispatchEvent(this, new TaskEventArgs($"Создание задачи {Name}"));
+            Creating.Invoke(this, new TaskEventArgs($"Создание задачи {Name}"));
         }
 
         /// <summary>
         /// Выполнение задачи
         /// </summary>
-        public void StartTask()
+        public void Run()
         {
-            BeginExecution.DispatchEvent(this, new TaskEventArgs($"Начало выполнения задачи {Name}"));
+            BeginExecution.Invoke(this, new TaskEventArgs($"Начало выполнения задачи {Name}"));
 
             //todo: выполнение задачи
             Console.WriteLine(Content);
 
-            EndExecution.DispatchEvent(this, new TaskEventArgs($"Окончание выполнения задачи {Name}"));
+            EndExecution.Invoke(this, new TaskEventArgs($"Окончание выполнения задачи {Name}"));
         }
 
         public void UpdatePriority(TaskPriority priority)

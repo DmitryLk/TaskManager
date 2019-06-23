@@ -9,7 +9,7 @@ namespace TaskManager.Models
         private List<Action<object, TaskEventArgs>> _handlerList;
 
         //проверка на null
-        public void DispatchEvent(object sender, TaskEventArgs e)
+        internal void Invoke(object sender, TaskEventArgs e)
         {
             foreach (var handler in _handlerList)
             {

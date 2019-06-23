@@ -6,34 +6,61 @@ using TaskManager.Enums;
 
 namespace TaskManager.Models
 {
-    public class TaskManager
+    public class TaskManager : ITaskManager
     {
         private readonly Dictionary<TaskPriority, ConcurrentQueue<Task>> _taskQueueDictionary;
+        private readonly Array _priorities;
+        private bool IsStarted = false;
+        private bool IsBusy = false;
 
         public TaskManager()
         {
             var _taskQueueDictionary = new Dictionary<TaskPriority, ConcurrentQueue<Task>>();
+            _priorities = Enum.GetValues(typeof(TaskPriority));
+            Array.Reverse(_priorities);
         }
 
         public void Enqueue(Task task)
         {
+            task.EndExecution.AddHandler(EndNextTaskExecution);
             _taskQueueDictionary[task.Priority].Enqueue(task);
+            if (!IsBusy && IsStarted) RunNextTask();
         }
 
         public void StartQueue()
         {
-            ConcurrentQueue<Task> queue;
-            var priorities = Enum.GetValues(typeof(TaskPriority));
-            Array.Reverse(priorities);
+            IsStarted = true;
+            RunNextTask();
+        }
 
-            foreach (var priority in priorities)
+        private void EndNextTaskExecution(object sender, TaskEventArgs e)
+        {
+            if (IsStarted) RunNextTask();
+        }
+
+        private void RunNextTask()
+        {
+            if (IsBusy = TryGetNextTask(out Task task)) task.Run();
+        }
+
+        public void StopQueue()
+        {
+            IsStarted = false;
+        }
+
+        private bool TryGetNextTask(out Task task)
+        {
+            task = null;
+            foreach (var priority in _priorities)
             {
-                queue = _taskQueueDictionary[(TaskPriority)priority];
-                while (queue.TryDequeue(out Task task))
+                var queue = _taskQueueDictionary[(TaskPriority)priority];
+                if (queue.TryDequeue(out Task taskQ))
                 {
-                    task.StartTask();
+                    task = taskQ;
+                    return true;
                 }
             }
+            return false;
         }
     }
 }
