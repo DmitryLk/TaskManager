@@ -17,6 +17,8 @@ namespace TaskManager.Models
         /// </summary>
         public string Content { get; private set; }
 
+        private static Random rand = new Random();
+
         public TaskType Type { get; private set; }
         public TaskPriority Priority { get; private set; }
         internal TaskEvent Creating { get; set; }
@@ -30,7 +32,7 @@ namespace TaskManager.Models
             Content = content ?? throw new ArgumentNullException(nameof(content));
             Priority = priority;
             Type = type;
-            Creating.Invoke(this, new TaskEventArgs($"Создание задачи {Name}"));
+            Creating.Invoke(this, new TaskEventArgs($"Создание задачи {Priority} {Name} {Type}"));
         }
 
         /// <summary>
@@ -38,12 +40,19 @@ namespace TaskManager.Models
         /// </summary>
         public void Run()
         {
-            BeginExecution.Invoke(this, new TaskEventArgs($"Начало выполнения задачи {Name}"));
+            BeginExecution.Invoke(this, new TaskEventArgs($"Начало выполнения задачи {Priority} {Name} {Type}"));
 
             //todo: выполнение задачи
-            Console.WriteLine(Content);
+            //Console.WriteLine(Content);
 
-            EndExecution.Invoke(this, new TaskEventArgs($"Окончание выполнения задачи {Name}"));
+            if (rand.Next(1, 10) > 1)
+            {
+                EndExecution.Invoke(this, new TaskEventArgs($"Окончание выполнения задачи {Priority} {Name} {Type}"));
+            }
+            else
+            {
+                Error.Invoke(this, new TaskEventArgs($"Ошибка выполнения задачи {Priority} {Name} {Type}"));
+            }
         }
 
         public void UpdatePriority(TaskPriority priority)
