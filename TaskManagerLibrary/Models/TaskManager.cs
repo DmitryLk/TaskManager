@@ -12,6 +12,7 @@ namespace TaskManager.Models
         private readonly Array _priorities;
         private bool IsStarted = false;
         private bool IsBusy = false;
+        private static object locker = new object();
 
         public TaskManager()
         {
@@ -24,13 +25,31 @@ namespace TaskManager.Models
         {
             task.EndExecution.AddHandler(EndNextTaskExecution);
             _taskQueueDictionary[task.Priority].Enqueue(task);
-            if (!IsBusy && IsStarted) RunNextTask();
+            if (!IsBusy && IsStarted)
+            {
+                lock (locker)
+                {
+                    if (!IsBusy && IsStarted)
+                    {
+                        RunNextTask();
+                    }
+                }
+            }
         }
 
         public void StartQueue()
         {
-            IsStarted = true;
-            RunNextTask();
+            if (!IsStarted)
+            {
+                lock (locker)
+                {
+                    if (!IsStarted)
+                    {
+                        IsStarted = true;
+                        RunNextTask();
+                    }
+                }
+            }
         }
 
         private void EndNextTaskExecution(object sender, TaskEventArgs e)
