@@ -4,9 +4,11 @@ using System.Text;
 
 namespace TaskManager.Models
 {
-    class TaskEventArgs
+    internal class TaskEventArgs
     {
-        // Сообщение
+        /// <summary>
+        /// Сообщение
+        /// </summary>
         public string Message { get; }
 
         public TaskEventArgs(string mes)
