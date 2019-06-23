@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TaskManager.Enums
 {
-    enum TaskType : byte
+    public enum TaskType : byte
     {
         FirstType,
         SecondType,

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TaskManager.Enums
 {
-    enum TaskPriority : byte
+    public enum TaskPriority : byte
     {
         VeryLow,
         Low,
@@ -12,5 +12,4 @@ namespace TaskManager.Enums
         High,
         VeryHigh
     }
-}
 }

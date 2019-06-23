@@ -17,6 +17,7 @@ namespace TaskManager.Models
             }
         }
 
+        //потокобезопасность
         public void AddHandler(Action<object, TaskEventArgs> action)
         {
             _handlerList.Add(action);
