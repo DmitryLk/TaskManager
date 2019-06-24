@@ -2,9 +2,9 @@
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using TaskManager.Enums;
+using TaskManagerLib.Enums;
 
-namespace TaskManager.Models
+namespace TaskManagerLib.Models
 {
     public class TaskManager : ITaskManager
     {
@@ -12,16 +12,21 @@ namespace TaskManager.Models
         private readonly Array _priorities;
         private bool IsStarted = false;
         private bool IsBusy = false;
-        private static object locker = new object();
+        private static readonly object locker = new object();
 
         public TaskManager()
         {
-            var _taskQueueDictionary = new Dictionary<TaskPriority, ConcurrentQueue<Task>>();
+            _taskQueueDictionary = new Dictionary<TaskPriority, ConcurrentQueue<Task>>();
             _priorities = Enum.GetValues(typeof(TaskPriority));
             Array.Reverse(_priorities);
+
+            foreach (var priority in _priorities)
+            {
+                _taskQueueDictionary.Add((TaskPriority)priority, new ConcurrentQueue<Task>());
+            }
         }
 
-        public void Enqueue(Task task)
+        public void TaskEnqueue(Task task)
         {
             task.EndExecution.AddHandler(EndNextTaskExecution);
             task.Error.AddHandler(EndNextTaskExecution);

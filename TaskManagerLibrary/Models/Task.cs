@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-using TaskManager.Enums;
+using TaskManagerLib.Enums;
 
 using System;
 
@@ -10,7 +10,7 @@ using System.Threading;
 
 using System.Threading.Tasks;
 
-namespace TaskManager.Models
+namespace TaskManagerLib.Models
 {
     public class Task
     {
@@ -28,10 +28,10 @@ namespace TaskManager.Models
 
         public TaskType Type { get; private set; }
         public TaskPriority Priority { get; private set; }
-        internal TaskEvent Creating { get; set; }
-        internal TaskEvent BeginExecution { get; set; }
-        internal TaskEvent EndExecution { get; set; }
-        internal TaskEvent Error { get; set; }
+        public TaskEvent Creating { get; set; } = new TaskEvent();
+        public TaskEvent BeginExecution { get; set; } = new TaskEvent();
+        public TaskEvent EndExecution { get; set; } = new TaskEvent();
+        public TaskEvent Error { get; set; } = new TaskEvent();
 
         public Task(string name, string content, TaskPriority priority, TaskType type)
         {
@@ -39,7 +39,7 @@ namespace TaskManager.Models
             Content = content ?? throw new ArgumentNullException(nameof(content));
             Priority = priority;
             Type = type;
-            Creating.Invoke(this, new TaskEventArgs($"Создание задачи {Priority} {Name} {Type}"));
+            Creating?.Invoke(this, new TaskEventArgs($"Создание задачи {Name} Priority:{Priority} Type:{Type}"));
         }
 
         /// <summary>
@@ -47,18 +47,18 @@ namespace TaskManager.Models
         /// </summary>
         public async void RunAsync()
         {
-            BeginExecution.Invoke(this, new TaskEventArgs($"Начало выполнения задачи {Priority} {Name} {Type}"));
+            BeginExecution?.Invoke(this, new TaskEventArgs($"Начало выполнения задачи {Name} Priority:{Priority} Type:{Type}"));
 
             //todo: выполнение задачи
             //Console.WriteLine(Content);
-            await System.Threading.Tasks.Task.Delay(100);
+            await System.Threading.Tasks.Task.Delay(500);
             if (rand.Next(1, 10) > 1)
             {
-                EndExecution.Invoke(this, new TaskEventArgs($"Окончание выполнения задачи {Priority} {Name} {Type}"));
+                EndExecution?.Invoke(this, new TaskEventArgs($"Окончание выполнения задачи {Name} Priority:{Priority} Type:{Type}"));
             }
             else
             {
-                Error.Invoke(this, new TaskEventArgs($"Ошибка выполнения задачи {Priority} {Name} {Type}"));
+                Error?.Invoke(this, new TaskEventArgs($"Ошибка выполнения задачи {Name} Priority:{Priority} Type:{Type}"));
             }
         }
 

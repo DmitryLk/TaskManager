@@ -1,8 +1,9 @@
-﻿namespace TaskManager.Models
+﻿namespace TaskManagerLib.Models
 {
     public interface ITaskManager
     {
-        void Enqueue(Task task);
+        void TaskEnqueue(Task task);
+
         void StartQueue();
     }
 }

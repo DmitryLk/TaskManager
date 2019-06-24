@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TaskManager.Enums
+namespace TaskManagerLib.Enums
 {
     public enum TaskType : byte
     {
-        FirstType,
-        SecondType,
-        ThirdType
+        Type1,
+        Type2,
+        Type3,
+        Type4,
+        Type5,
     }
 }

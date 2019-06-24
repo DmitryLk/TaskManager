@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TaskManager.Models
+namespace TaskManagerLib.Models
 {
-    internal class TaskEvent
+    public class TaskEvent
     {
-        private List<Action<object, TaskEventArgs>> _handlerList;
+        private readonly List<Action<object, TaskEventArgs>> _handlerList = new List<Action<object, TaskEventArgs>>();
+        private static readonly object locker = new object();
 
         //проверка на null
         internal void Invoke(object sender, TaskEventArgs e)
@@ -17,15 +18,32 @@ namespace TaskManager.Models
             }
         }
 
-        //потокобезопасность
+        public static TaskEvent operator +(TaskEvent taskEvent, Action<object, TaskEventArgs> action)
+        {
+            taskEvent.AddHandler(action);
+            return taskEvent;
+        }
+
+        public static TaskEvent operator -(TaskEvent taskEvent, Action<object, TaskEventArgs> action)
+        {
+            taskEvent.AddHandler(action);
+            return taskEvent;
+        }
+
         public void AddHandler(Action<object, TaskEventArgs> action)
         {
-            _handlerList.Add(action);
+            lock (locker)
+            {
+                _handlerList.Add(action);
+            }
         }
 
         public void RemoveHandler(Action<object, TaskEventArgs> action)
         {
-            _handlerList.Remove(action);
+            lock (locker)
+            {
+                _handlerList.Remove(action);
+            }
         }
     }
 }

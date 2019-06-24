@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace TaskManager.Models
+namespace TaskManagerLib.Models
 {
-    internal class TaskEventArgs
+    public class TaskEventArgs
     {
         /// <summary>
         /// Сообщение
