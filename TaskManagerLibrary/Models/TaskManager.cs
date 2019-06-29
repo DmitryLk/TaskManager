@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using TaskManagerLib.Enums;
 
 namespace TaskManagerLib.Models
@@ -16,21 +16,23 @@ namespace TaskManagerLib.Models
 
         public TaskManager()
         {
-            _taskQueueDictionary = new Dictionary<TaskPriority, ConcurrentQueue<Task>>();
             _priorities = Enum.GetValues(typeof(TaskPriority));
             Array.Reverse(_priorities);
 
+            _taskQueueDictionary = new Dictionary<TaskPriority, ConcurrentQueue<Task>>();
             foreach (var priority in _priorities)
             {
                 _taskQueueDictionary.Add((TaskPriority)priority, new ConcurrentQueue<Task>());
             }
         }
 
-        public void TaskEnqueue(Task task)
+        public bool TaskEnqueue([NotNull]Task task)
         {
-            task.EndExecution.AddHandler(EndNextTaskExecution);
-            task.Error.AddHandler(EndNextTaskExecution);
+            task.EndExecution += EndNextTaskExecution;
+            task.Error += EndNextTaskExecution;
+
             _taskQueueDictionary[task.Priority].Enqueue(task);
+
             if (!IsBusy && IsStarted)
             {
                 lock (locker)
@@ -38,12 +40,15 @@ namespace TaskManagerLib.Models
                     if (!IsBusy && IsStarted)
                     {
                         RunNextTask();
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
-        public void StartQueue()
+        public bool StartQueue()
         {
             if (!IsStarted)
             {
@@ -53,9 +58,12 @@ namespace TaskManagerLib.Models
                     {
                         IsStarted = true;
                         RunNextTask();
+                        return true;
                     }
                 }
             }
+
+            return false;
         }
 
         private void EndNextTaskExecution(object sender, TaskEventArgs e)
@@ -86,6 +94,16 @@ namespace TaskManagerLib.Models
                 }
             }
             return false;
+        }
+
+        public bool TaskManagerIsStarted()
+        {
+            return IsStarted;
+        }
+
+        public bool TaskManagerIsBusy()
+        {
+            return IsBusy;
         }
     }
 }

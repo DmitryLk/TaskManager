@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TaskManagerLib.Models
 {
-    public class TaskEventArgs
+    public class TaskEventArgs : EventArgs
     {
         /// <summary>
         /// Сообщение

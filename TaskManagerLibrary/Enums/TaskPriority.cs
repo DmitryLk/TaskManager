@@ -6,7 +6,7 @@ namespace TaskManagerLib.Enums
 {
     public enum TaskPriority : byte
     {
-        VeryLow,
+        VeryLow = 1,
         Low,
         Middle,
         High,

@@ -1,18 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using TaskManagerLib.Enums;
-
-using System;
-
-using System.Threading;
-
-using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace TaskManagerLib.Models
 {
-    public class Task
+    public class Task : ITask
     {
         /// <summary>
         /// Название задачи
@@ -28,44 +20,42 @@ namespace TaskManagerLib.Models
 
         public TaskType Type { get; private set; }
         public TaskPriority Priority { get; private set; }
+
         public TaskEvent Creating { get; set; } = new TaskEvent();
         public TaskEvent BeginExecution { get; set; } = new TaskEvent();
         public TaskEvent EndExecution { get; set; } = new TaskEvent();
         public TaskEvent Error { get; set; } = new TaskEvent();
 
-        public Task(string name, string content, TaskPriority priority, TaskType type)
+        public Task([NotNull]string name, [NotNull]string content, [NotNull]TaskPriority priority, [NotNull]TaskType type)
         {
             Name = name;
             Content = content ?? throw new ArgumentNullException(nameof(content));
             Priority = priority;
             Type = type;
-            Creating?.Invoke(this, new TaskEventArgs($"Создание задачи {Name} Priority:{Priority} Type:{Type}"));
+            Creating?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Создание"));
         }
 
         /// <summary>
         /// Выполнение задачи
         /// </summary>
-        public async void RunAsync()
+        public async System.Threading.Tasks.Task<bool> RunAsync()
         {
-            BeginExecution?.Invoke(this, new TaskEventArgs($"Начало выполнения задачи {Name} Priority:{Priority} Type:{Type}"));
+            bool result;
+            BeginExecution?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Начало выполнения"));
 
             //todo: выполнение задачи
-            //Console.WriteLine(Content);
-            await System.Threading.Tasks.Task.Delay(500);
-            if (rand.Next(1, 10) > 1)
-            {
-                EndExecution?.Invoke(this, new TaskEventArgs($"Окончание выполнения задачи {Name} Priority:{Priority} Type:{Type}"));
-            }
-            else
-            {
-                Error?.Invoke(this, new TaskEventArgs($"Ошибка выполнения задачи {Name} Priority:{Priority} Type:{Type}"));
-            }
-        }
+            await System.Threading.Tasks.Task.Delay(1000);
+            result = rand.Next(1, 10) > 1;
 
-        //private static System.Threading.Tasks.Task Delay(int v)
-        //{
-        //    throw new NotImplementedException();
-        //}
+            if (!result)
+            {
+                Error?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Ошибка выполнения\r\n"));
+                return result;
+            }
+
+            EndExecution?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Окончание выполнения\r\n"));
+            return result;
+        }
 
         public void UpdatePriority(TaskPriority priority)
         {
@@ -73,9 +63,3 @@ namespace TaskManagerLib.Models
         }
     }
 }
-
-/*
-//public string Content { get; private set; }
-//public TaskPriority Priority { get; private set; }
-//public TaskType Type { get; private set; }
- */

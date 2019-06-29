@@ -9,7 +9,8 @@ namespace TaskManagerLib.Models
         private readonly List<Action<object, TaskEventArgs>> _handlerList = new List<Action<object, TaskEventArgs>>();
         private static readonly object locker = new object();
 
-        //проверка на null
+        // проверка на null
+        // сработка по очереди
         internal void Invoke(object sender, TaskEventArgs e)
         {
             foreach (var handler in _handlerList)
@@ -26,7 +27,7 @@ namespace TaskManagerLib.Models
 
         public static TaskEvent operator -(TaskEvent taskEvent, Action<object, TaskEventArgs> action)
         {
-            taskEvent.AddHandler(action);
+            taskEvent.RemoveHandler(action);
             return taskEvent;
         }
 

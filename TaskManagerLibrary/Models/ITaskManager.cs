@@ -1,9 +1,13 @@
-﻿namespace TaskManagerLib.Models
+﻿using JetBrains.Annotations;
+
+namespace TaskManagerLib.Models
 {
     public interface ITaskManager
     {
-        void TaskEnqueue(Task task);
-
-        void StartQueue();
+        bool StartQueue();
+        void StopQueue();
+        bool TaskEnqueue([NotNull] Task task);
+        bool TaskManagerIsBusy();
+        bool TaskManagerIsStarted();
     }
 }
