@@ -20,7 +20,7 @@ namespace ConsoleApp1
             TaskAttach(new Task("task6", 2, 2, (x, y) => x * y == 4, TaskPriority.VeryLow, TaskType.Type1));
             TaskAttach(new Task("task7", 2, 2, (x, y) => x + y == 4, TaskPriority.Middle, TaskType.Type1));
             TaskAttach(new Task("task8", 2, 2, (x, y) => x + y == 5, TaskPriority.Middle, TaskType.Type1));
-            TaskAttach(new Task("task9", 2, 2, (x, y) => x * y == 4, TaskPriority.High, TaskType.Type1));
+            TaskAttach(new Task("task9", 2, 0, (x, y) => x / y == 4, TaskPriority.High, TaskType.Type1));
             taskManager.StartQueue();
             taskManager.StopQueue();
             taskManager.StartQueue();

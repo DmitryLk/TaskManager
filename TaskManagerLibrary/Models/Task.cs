@@ -1,6 +1,7 @@
 ﻿using System;
 using TaskManagerLib.Enums;
 using JetBrains.Annotations;
+using System.Linq.Expressions;
 
 namespace TaskManagerLib.Models
 {
@@ -14,7 +15,7 @@ namespace TaskManagerLib.Models
         /// <summary>
         /// Содержимое задачи
         /// </summary>
-        private readonly Func<int, int, bool> _contentFunc;
+        private readonly Expression<Func<int, int, bool>> _contentFunc;
 
         private readonly int _x;
         private readonly int _y;
@@ -29,7 +30,7 @@ namespace TaskManagerLib.Models
         public TaskEvent EndExecution { get; set; } = new TaskEvent();
         public TaskEvent Error { get; set; } = new TaskEvent();
 
-        public Task([NotNull]string name, int x, int y, [NotNull]Func<int, int, bool> content, TaskPriority priority, TaskType type)
+        public Task([NotNull]string name, int x, int y, [NotNull]Expression<Func<int, int, bool>> content, TaskPriority priority, TaskType type)
         {
             Name = name;
             _contentFunc = content ?? throw new ArgumentNullException(nameof(content));
@@ -50,25 +51,28 @@ namespace TaskManagerLib.Models
             BeginExecution?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Начало выполнения"));
 
             //todo: выполнение задачи
-            try
+            result = await System.Threading.Tasks.Task.Run(() =>
             {
-                result = await System.Threading.Tasks.Task.Run(() =>
+                bool lambdaResult;
+                System.Threading.Tasks.Task.Delay(1000);
+                try
                 {
-                    System.Threading.Tasks.Task.Delay(1000);
-                    if (_contentFunc(_x, _y))
-                    {
-                        return TaskResult.CreateSuccess("Успешно");
-                    }
-                    else
-                    {
-                        return TaskResult.CreateError(TaskError.False, "Ошибка");
-                    }
-                });
-            }
-            catch (Exception ex)
-            {
-                result = TaskResult.CreateError(TaskError.Exception, "Ошибка"); ;
-            }
+                    lambdaResult = _contentFunc.Compile().Invoke(_x, _y);
+                }
+                catch
+                {
+                    return TaskResult.CreateError(TaskError.Exception, "Ошибка"); ;
+                }
+
+                if (lambdaResult)
+                {
+                    return TaskResult.CreateSuccess("Успешно");
+                }
+                else
+                {
+                    return TaskResult.CreateError(TaskError.False, "Ошибка");
+                }
+            });
 
             if (result.HasError())
             {
