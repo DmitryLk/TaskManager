@@ -10,8 +10,10 @@ namespace TaskManagerLib.Models
     {
         private readonly Dictionary<TaskPriority, ConcurrentQueue<Task>> _taskQueueDictionary;
         private readonly Array _priorities;
-        private bool IsStarted = false;
-        private bool IsBusy = false;
+
+        public bool IsStarted { get; private set; }
+        public bool IsBusy { get; private set; }
+
         private static readonly object locker = new object();
 
         public TaskManager()
@@ -28,6 +30,7 @@ namespace TaskManagerLib.Models
 
         public bool TaskEnqueue([NotNull]Task task)
         {
+            if (task == null) throw new ArgumentNullException(nameof(task));
             task.EndExecution += EndNextTaskExecution;
             task.Error += EndNextTaskExecution;
 
@@ -44,7 +47,6 @@ namespace TaskManagerLib.Models
                     }
                 }
             }
-
             return false;
         }
 
@@ -94,16 +96,6 @@ namespace TaskManagerLib.Models
                 }
             }
             return false;
-        }
-
-        public bool TaskManagerIsStarted()
-        {
-            return IsStarted;
-        }
-
-        public bool TaskManagerIsBusy()
-        {
-            return IsBusy;
         }
     }
 }

@@ -14,9 +14,12 @@ namespace TaskManagerLib.Models
         /// <summary>
         /// Содержимое задачи
         /// </summary>
-        public string Content { get; private set; }
+        private readonly Func<int, int, bool> _contentFunc;
 
-        private static Random rand = new Random();
+        private readonly int _x;
+        private readonly int _y;
+
+        private TaskResult _result;
 
         public TaskType Type { get; private set; }
         public TaskPriority Priority { get; private set; }
@@ -26,10 +29,13 @@ namespace TaskManagerLib.Models
         public TaskEvent EndExecution { get; set; } = new TaskEvent();
         public TaskEvent Error { get; set; } = new TaskEvent();
 
-        public Task([NotNull]string name, [NotNull]string content, [NotNull]TaskPriority priority, [NotNull]TaskType type)
+        public Task([NotNull]string name, int x, int y, [NotNull]Func<int, int, bool> content, TaskPriority priority, TaskType type)
         {
             Name = name;
-            Content = content ?? throw new ArgumentNullException(nameof(content));
+            _contentFunc = content ?? throw new ArgumentNullException(nameof(content));
+            _x = x;
+            _y = y;
+
             Priority = priority;
             Type = type;
             Creating?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Создание"));
@@ -38,22 +44,42 @@ namespace TaskManagerLib.Models
         /// <summary>
         /// Выполнение задачи
         /// </summary>
-        public async System.Threading.Tasks.Task<bool> RunAsync()
+        public async System.Threading.Tasks.Task<TaskResult> RunAsync()
         {
-            bool result;
+            TaskResult result;
             BeginExecution?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Начало выполнения"));
 
             //todo: выполнение задачи
-            await System.Threading.Tasks.Task.Delay(1000);
-            result = rand.Next(1, 10) > 1;
-
-            if (!result)
+            try
             {
-                Error?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Ошибка выполнения\r\n"));
-                return result;
+                result = await System.Threading.Tasks.Task.Run(() =>
+                {
+                    System.Threading.Tasks.Task.Delay(1000);
+                    if (_contentFunc(_x, _y))
+                    {
+                        return TaskResult.CreateSuccess("Успешно");
+                    }
+                    else
+                    {
+                        return TaskResult.CreateError(TaskError.False, "Ошибка");
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                result = TaskResult.CreateError(TaskError.Exception, "Ошибка"); ;
             }
 
-            EndExecution?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Окончание выполнения\r\n"));
+            if (result.HasError())
+            {
+                EndExecution?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Задача выполнена Result:{result.Message} {result.Error}\r\n"));
+            }
+            else
+            {
+                Error?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Задача выполнена Result:{result.Message} {result.Error}\r\n"));
+            }
+
+            _result = result;
             return result;
         }
 

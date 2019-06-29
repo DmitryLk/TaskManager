@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.Cryptography;
 using TaskManagerLib.Enums;
 using TaskManagerLib.Models;
 
@@ -7,22 +6,21 @@ namespace ConsoleApp1
 {
     internal class Program
     {
-        private static TaskManager taskManager = new TaskManager();
+        private static ITaskManager taskManager = new TaskManager();
 
         private static void Main(string[] args)
         {
-            TaskAttach(new Task("task1", "task1_content", TaskPriority.Middle, TaskType.Type1));
-            TaskAttach(new Task("task2", "task2_content", TaskPriority.High, TaskType.Type1));
-            TaskAttach(new Task("task3", "task3_content", TaskPriority.VeryLow, TaskType.Type1));
+            TaskAttach(new Task("task1", 2, 2, (x, y) => x + y == 4, TaskPriority.Middle, TaskType.Type1));
+            TaskAttach(new Task("task2", 2, 2, (x, y) => x + y == 4, TaskPriority.High, TaskType.Type1));
+            TaskAttach(new Task("task3", 2, 0, (x, y) => x * y == 5, TaskPriority.VeryLow, TaskType.Type1));
             taskManager.StartQueue();
-            TaskAttach(new Task("task4", "task4_content", TaskPriority.VeryHigh, TaskType.Type1));
-            TaskAttach(new Task("task5", "task5_content", TaskPriority.Low, TaskType.Type1));
+            TaskAttach(new Task("task4", 2, 2, (x, y) => x + y == 4, TaskPriority.VeryHigh, TaskType.Type1));
+            TaskAttach(new Task("task5", 2, 2, (x, y) => x + y == 5, TaskPriority.Low, TaskType.Type1));
             taskManager.StopQueue();
-            TaskAttach(new Task("task6", "task6_content", TaskPriority.VeryLow, TaskType.Type1));
-            TaskAttach(new Task("task7", "task7_content", TaskPriority.Middle, TaskType.Type1));
-            TaskAttach(new Task("task8", "task8_content", TaskPriority.Middle, TaskType.Type1));
-            TaskAttach(new Task("task9", "task9_content", TaskPriority.High, TaskType.Type1));
-            TaskAttach(new Task("task10", "task10_content", TaskPriority.VeryHigh, TaskType.Type1));
+            TaskAttach(new Task("task6", 2, 2, (x, y) => x * y == 4, TaskPriority.VeryLow, TaskType.Type1));
+            TaskAttach(new Task("task7", 2, 2, (x, y) => x + y == 4, TaskPriority.Middle, TaskType.Type1));
+            TaskAttach(new Task("task8", 2, 2, (x, y) => x + y == 5, TaskPriority.Middle, TaskType.Type1));
+            TaskAttach(new Task("task9", 2, 2, (x, y) => x * y == 4, TaskPriority.High, TaskType.Type1));
             taskManager.StartQueue();
             taskManager.StopQueue();
             taskManager.StartQueue();
