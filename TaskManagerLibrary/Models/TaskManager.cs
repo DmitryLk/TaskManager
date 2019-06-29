@@ -57,7 +57,7 @@ namespace TaskManagerLib.Models
                     if (!IsStarted)
                     {
                         IsStarted = true;
-                        RunNextTask();
+                        if (!IsBusy) RunNextTask();
                         return true;
                     }
                 }
