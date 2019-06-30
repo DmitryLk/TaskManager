@@ -2,9 +2,13 @@ using NUnit.Framework;
 using System;
 using TaskManagerLib.Enums;
 using TaskManagerLib.Models;
+using TaskManagerLib.Services;
 
 namespace Tests
 {
+    /// <summary>
+    /// Тесты для класса TaskManagerTests
+    /// </summary>
     public class TaskManagerTests
     {
         [Test]
@@ -39,7 +43,7 @@ namespace Tests
         {
             //Arrange
             var taskManager = new TaskManager();
-            var task = new Task("test", 2, 2, (x, y) => false, TaskPriority.High, TaskType.Type1);
+            var task = new Task("test", 2, 2, (x, y) => false, TaskType.Type1, TaskPriority.High);
 
             //Act
             var result = taskManager.TaskEnqueue(task);
@@ -54,7 +58,7 @@ namespace Tests
             //Arrange
             var taskManager = new TaskManager();
             taskManager.StartQueue();
-            var task = new Task("test", 2, 2, (x, y) => false, TaskPriority.High, TaskType.Type1);
+            var task = new Task("test", 2, 2, (x, y) => false, TaskType.Type1, TaskPriority.High);
 
             //Act
             var result = taskManager.TaskEnqueue(task);

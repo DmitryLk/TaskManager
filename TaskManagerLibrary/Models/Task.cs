@@ -2,62 +2,66 @@
 using TaskManagerLib.Enums;
 using JetBrains.Annotations;
 using System.Linq.Expressions;
+using TaskManagerLib.Ports;
 
 namespace TaskManagerLib.Models
 {
+    /// <summary>
+    /// Задача
+    /// </summary>
     public class Task : ITask
     {
-        /// <summary>
-        /// Название задачи
-        /// </summary>
         public string Name { get; private set; }
 
-        /// <summary>
-        /// Содержимое задачи
-        /// </summary>
         private readonly Expression<Func<int, int, bool>> _contentFunc;
-
-        private readonly int _x;
-        private readonly int _y;
-
-        private TaskResult _result;
-
         public TaskType Type { get; private set; }
         public TaskPriority Priority { get; private set; }
+
+        private readonly int _argument1;
+        private readonly int _argument2;
+        private ITaskResult _result;
 
         public TaskEvent Creating { get; set; } = new TaskEvent();
         public TaskEvent BeginExecution { get; set; } = new TaskEvent();
         public TaskEvent EndExecution { get; set; } = new TaskEvent();
         public TaskEvent Error { get; set; } = new TaskEvent();
 
-        public Task([NotNull]string name, int x, int y, [NotNull]Expression<Func<int, int, bool>> content, TaskPriority priority, TaskType type)
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="названиеи задачи"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="content"></param>
+        /// <param name="priority"></param>
+        /// <param name="type"></param>
+        public Task([NotNull]string name, int argument1, int argument2, [NotNull]Expression<Func<int, int, bool>> content, TaskType type = TaskType.Type1, TaskPriority priority = TaskPriority.VeryLow)
         {
             Name = name;
             _contentFunc = content ?? throw new ArgumentNullException(nameof(content));
-            _x = x;
-            _y = y;
+            _argument1 = argument1;
+            _argument2 = argument2;
 
             Priority = priority;
             Type = type;
             Creating?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Создание"));
         }
 
-        /// <summary>
-        /// Выполнение задачи
-        /// </summary>
-        public async System.Threading.Tasks.Task<TaskResult> RunAsync()
+        #region Методы
+
+        public async System.Threading.Tasks.Task<ITaskResult> RunAsync()
         {
-            TaskResult result;
+            ITaskResult result;
             BeginExecution?.Invoke(this, new TaskEventArgs($"Задача {Name} Priority:{Priority} Type:{Type} Начало выполнения"));
 
             //todo: выполнение задачи
-            result = await System.Threading.Tasks.Task.Run(() =>
+            result = await System.Threading.Tasks.Task.Run(async () =>
             {
                 bool lambdaResult;
-                System.Threading.Tasks.Task.Delay(1000);
+                await System.Threading.Tasks.Task.Delay(1000);
                 try
                 {
-                    lambdaResult = _contentFunc.Compile().Invoke(_x, _y);
+                    lambdaResult = _contentFunc.Compile().Invoke(_argument1, _argument2);
                 }
                 catch
                 {
@@ -91,5 +95,7 @@ namespace TaskManagerLib.Models
         {
             this.Priority = priority;
         }
+
+        #endregion Методы
     }
 }

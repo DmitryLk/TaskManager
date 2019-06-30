@@ -4,9 +4,12 @@ using System.Text;
 
 namespace TaskManagerLib.Enums
 {
+    /// <summary>
+    /// Типы ошибок
+    /// </summary>
     public enum TaskError : byte
     {
-        False,
-        Exception
+        False = 1,
+        Exception = 2
     }
 }

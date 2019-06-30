@@ -1,23 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using TaskManagerLib.Enums;
+using TaskManagerLib.Ports;
 
 namespace TaskManagerLib.Models
 {
-    public class TaskResult
+    /// <summary>
+    /// Результат выполнения задачи
+    /// </summary>
+    public class TaskResult : ITaskResult
     {
-        public TaskError? Error;
-        public string Message;
+        public TaskError? Error { get; set; }
 
-        private TaskResult([NotNull]TaskError error, [NotNull]string message)
+        public string Message { get; set; }
+
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="error"></param>
+        private TaskResult(string message, TaskError error)
         {
             Error = error;
             Message = message;
         }
 
-        private TaskResult([NotNull]string message)
+        /// <summary>
+        /// ctor
+        /// </summary>
+        /// <param name="message"></param>
+        private TaskResult(string message)
         {
             Message = message;
         }
@@ -27,14 +38,25 @@ namespace TaskManagerLib.Models
             return Error != null;
         }
 
+        /// <summary>
+        /// Фабрика генерации успешного результата
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public static TaskResult CreateSuccess(string message)
         {
             return new TaskResult(message);
         }
 
+        /// <summary>
+        /// Фабрика генерации неуспешного результата
+        /// </summary>
+        /// <param name="error"></param>
+        /// <param name="message"></param>
+        /// <returns></returns>
         public static TaskResult CreateError(TaskError error, string message)
         {
-            return new TaskResult(error, message);
+            return new TaskResult(message, error);
         }
     }
 }

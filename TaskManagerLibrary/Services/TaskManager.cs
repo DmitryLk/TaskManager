@@ -3,32 +3,39 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using TaskManagerLib.Enums;
+using TaskManagerLib.Models;
+using TaskManagerLib.Ports;
 
-namespace TaskManagerLib.Models
+namespace TaskManagerLib.Services
 {
+    /// <summary>
+    /// Сервис управления задачами
+    /// </summary>
     public class TaskManager : ITaskManager
     {
-        private readonly Dictionary<TaskPriority, ConcurrentQueue<Task>> _taskQueueDictionary;
+        private readonly Dictionary<TaskPriority, ConcurrentQueue<ITask>> _taskQueueDictionary;
         private readonly Array _priorities;
+        private static readonly object locker = new object();
 
         public bool IsStarted { get; private set; }
         public bool IsBusy { get; private set; }
 
-        private static readonly object locker = new object();
-
+        /// <summary>
+        /// ctor
+        /// </summary>
         public TaskManager()
         {
             _priorities = Enum.GetValues(typeof(TaskPriority));
             Array.Reverse(_priorities);
 
-            _taskQueueDictionary = new Dictionary<TaskPriority, ConcurrentQueue<Task>>();
+            _taskQueueDictionary = new Dictionary<TaskPriority, ConcurrentQueue<ITask>>();
             foreach (var priority in _priorities)
             {
-                _taskQueueDictionary.Add((TaskPriority)priority, new ConcurrentQueue<Task>());
+                _taskQueueDictionary.Add((TaskPriority)priority, new ConcurrentQueue<ITask>());
             }
         }
 
-        public bool TaskEnqueue([NotNull]Task task)
+        public bool TaskEnqueue(ITask task)
         {
             if (task == null) throw new ArgumentNullException(nameof(task));
             task.EndExecution += EndNextTaskExecution;
@@ -68,6 +75,11 @@ namespace TaskManagerLib.Models
             return false;
         }
 
+        public void StopQueue()
+        {
+            IsStarted = false;
+        }
+
         private void EndNextTaskExecution(object sender, TaskEventArgs e)
         {
             if (IsStarted) RunNextTask();
@@ -75,21 +87,16 @@ namespace TaskManagerLib.Models
 
         private void RunNextTask()
         {
-            if (IsBusy = TryGetNextTask(out Task task)) task.RunAsync();
+            if (IsBusy = TryGetNextTask(out ITask task)) task.RunAsync();
         }
 
-        public void StopQueue()
-        {
-            IsStarted = false;
-        }
-
-        private bool TryGetNextTask(out Task task)
+        private bool TryGetNextTask(out ITask task)
         {
             task = null;
             foreach (var priority in _priorities)
             {
                 var queue = _taskQueueDictionary[(TaskPriority)priority];
-                if (queue.TryDequeue(out Task taskQ))
+                if (queue.TryDequeue(out ITask taskQ))
                 {
                     task = taskQ;
                     return true;
